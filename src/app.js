@@ -5,9 +5,7 @@ const app = express();
 // You can change this port if 3000 is allocated on your computer
 const port = 3000;
 
-// ----------------------------------------------------------------------------------------
 // Express "middlewares":
-// ----------------------------------------------------------------------------------------
 // all files in "public" can be accessed from the browser
 //  using their file name (omit "src/public" in the path):
 //   "/" -> /src/public/index.html
@@ -18,12 +16,11 @@ app.use(express.urlencoded({ extended: true }));
 // enable parsing of json body
 app.use(express.json());
 
-// ----------------------------------------------------------------------------------------
-// IMPLEMENT YOUR REQUEST HANDLER FUNCTIONS HERE
+// Implement your request handlers here:
 //  (after the middlewares and before starting the server with 'listen' below)
-// ----------------------------------------------------------------------------------------
+//
 
-// HOW TO WRITE AN ENDPOINT WITH EXPRESS:
+// HOW TO WRITE AND ENDPOINT WITH EXPRESS:
 //  - write a function "app.HTTP_METHOD(...)" for each of your endpoint
 //    (like "app.get" or "app.post")
 //  - that function has two arguments:
@@ -73,9 +70,60 @@ app.get("/hello", (req, res) => {
   return res.send(`Hello, ${message}`);
 });
 
-// ----------------------------------------------------------------------------------------
+app.get("/start", (req, res) => {
+  if (!req.get("HX-Request")) {
+    return res.status(404).send("No HX Header");
+  }
+  res.send(
+    // language=HTML
+
+    `
+<div id="control">
+  <div hx-trigger="every 1s" hx-get="/time?count=0" hx-swap="outerHTML"></div>
+  <button type="button" hx-get="/stop" hx-target="#control" hx-swap="outerHTML">Stop</button>
+</div>
+  `,
+  );
+});
+
+app.get("/stop", (req, res) => {
+  res.send(`
+<div>
+    <button
+        type="button"
+        hx-get="/start"
+        hx-swap="outerHTML"
+    >
+     Start!
+    </button>
+    
+</div>
+ `);
+});
+
+app.get("/time", (req, res) => {
+  if (!req.get("HX-Request")) {
+    return res.status(404).send("No HX Header");
+  }
+
+  const count = parseInt(req.query.count || "0") + 1;
+
+  res.send(
+    // language=HTML
+    `
+      <div hx-trigger="every 1s" hx-get="/time?count=${count}" hx-swap="outerHTML">
+${count} - ${new Date().toLocaleTimeString()}        
+</div>  
+  `,
+  );
+});
+
+app.post("/submit", (req, res) => {
+  console.log(req.body); // You can handle form data here
+  res.send("Form data received");
+});
+
 // Start the server
-// ----------------------------------------------------------------------------------------
 //   ⚠️ this must be AFTER your endpoint handler functions
 //      just leave it at the end of this file
 app.listen(port, () => {
