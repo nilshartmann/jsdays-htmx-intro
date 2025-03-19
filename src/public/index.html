@@ -6,9 +6,56 @@
     <!-- Include HTMX. Note, in real life you would use the minified version -->
     <script src="htmx/htmx-2.0.4.js"></script>
     <title>HTMX Playground</title>
+    <style>
+      #loading {
+        visibility: hidden;
+      }
+
+      #loading.htmx-request{
+        visibility: visible;
+      }
+    </style>
   </head>
   <body>
-    <h1>Todo!</h1>
-    <p>Link zur Aufgabenbeschreibung bekommst du von mir</p>
+    <h1>Guten Morgen!</h1>
+    <button hx-get="/read-more" hx-target="#readMore"> Read more...</button>
+
+    <div id="readMore"></div>
+
+    <h2>Todo List</h2>
+    <form>
+      <label>Neues Todo</label>
+      <input type="text" name="todo" value="hallo"
+        hx-on:input="document.getElementById('addTodoButton').disabled = event.target.value.length<1"
+      />
+
+      <button
+          id="addTodoButton"
+          disabled
+          hx-disabled-elt="this"
+          hx-indicator="#loading"
+          hx-post="/todos" hx-target="#todos" hx-swap="beforeend">Add Todo</button>
+    </form>
+
+    <div id="loading">Todo wird gespeichert</div>
+
+    <script>
+      function checkSearch(event) {
+        console.log("event", event);
+
+        return event.target.value.length>3;
+      }
+    </script>
+
+    <ol id="todos"></ol>
+
+    <h2>Search...</h2>
+    <input type="checkbox" name="case" />Case sensitive
+    <input name="searchitem"
+           hx-post="/search"
+           hx-include="[name='case']"
+           hx-trigger="input[checkSearch(event)] delay:500"
+    />
+
   </body>
 </html>

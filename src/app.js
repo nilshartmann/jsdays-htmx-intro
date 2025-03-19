@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const { sleep } = require("./util");
 const app = express();
 
 // You can change this port if 3000 is allocated on your computer
@@ -17,6 +18,33 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 // enable parsing of json body
 app.use(express.json());
+
+app.get("/read-more", (req, res) => {
+  if (!req.get("HX-Request")) {
+    return res.status(404).send("Kein HTMX Request");
+  }
+
+  return res.send(
+// language=HTML
+`<div>
+  <h1>Some more information</h1>
+  <p>Tolle Informationen mit HTMX!</p>
+  </div>
+`
+
+  )
+})
+
+app.post("/todos", async (req, res) => {
+  await sleep(5000);
+  res.send(
+    // language=HTML
+    `<li>${req.body.todo}</li>
+    `
+  )
+
+})
+
 
 // ----------------------------------------------------------------------------------------
 // IMPLEMENT YOUR REQUEST HANDLER FUNCTIONS HERE
